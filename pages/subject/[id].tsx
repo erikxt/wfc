@@ -1,8 +1,8 @@
 import api from "../../lib/service";
 import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
 import Head from "next/head";
 import { Link } from "@mui/material";
+import styles from "../../styles/Subject.module.css";
 
 export async function getStaticPaths() {
   const res = await api.getSubjectIds();
@@ -18,20 +18,20 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }: any) {
   const res = await api.getSubject(params.id);
+  // console.log(res.status);
   const subject = res.data;
-  console.log(subject);
+  // console.log(subject);
   return {
     props: {
       subject,
     },
-    revalidate: 10,
   };
 }
 
 export default function Subject({ subject }: any) {
   const labels: JSX.Element[] = [];
   subject.labelNames.forEach((item: any) => {
-    labels.push(<span key={item} className="label"> #{item} </span>);
+    labels.push(<span key={item} className={styles.label}> #{item} </span>);
   });
 
   return (
@@ -41,20 +41,15 @@ export default function Subject({ subject }: any) {
           {subject.id}. {subject.subjectName}
         </title>
       </Head>
-      <div>
-        <Box sx={{ width: "100%", maxWidth: 500 }}>
-          
-          <h2>{subject.subjectName}</h2>
-          <div
-            dangerouslySetInnerHTML={{ __html: subject.subjectAnswer }}
-          ></div>
-          <div className="labels">Labels: {labels}</div>
-          <div className="home">
-            <Link href="/">
-              <Button variant="contained">Home</Button>
-            </Link>
-          </div>
-        </Box>
+      <div className={styles.content}>
+        <h2>{subject.subjectName}</h2>
+        <div dangerouslySetInnerHTML={{ __html: subject.subjectAnswer }}></div>
+        <div className={styles.labels}>Labels: {labels}</div>
+        <div className={styles.home}>
+          <Link href="/">
+            <Button variant="contained">Home</Button>
+          </Link>
+        </div>
       </div>
     </>
   );

@@ -1,0 +1,32 @@
+.labels {
+  margin : 10% 0 20px 0;
+  padding: 10px 0 10px 0;
+  display: flex;
+}
+
+.label {
+  margin    : 0 5px 0 5px;
+  /* padding: 0 5px 0 5px; */
+  color     : purple;
+}
+
+.label:hover {
+  text-decoration: underline;
+}
+
+.home {
+  padding        : 20px;
+  margin         : auto;
+  display        : flex;
+  justify-content: center;
+  align-items    : center;
+}
+
+.content {
+  position : relative;
+  top      : 15px;
+  left     : 50%;
+  transform: translate(-50%, 0);
+  width    : "100%";
+  max-width: 500px;
+}

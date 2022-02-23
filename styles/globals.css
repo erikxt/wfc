@@ -19,34 +19,11 @@ h2 {
   text-align: center;
 }
 
-div {
-  margin: auto;
+
+.powerBy {
+  margin-left: 7px;
 }
 
-p {
-  font-size: medium;
-}
-
-.labels {
-  margin: 10% 0 20px 0;
-  padding: 10px 0 10px 0;
-  display: flex;
-}
-
-.label {
-  margin: 0 5px 0 5px;
-  /* padding: 0 5px 0 5px; */
-  color: purple;
-}
-
-.label:hover {
+.powerBy:hover {
   text-decoration: underline;
-}
-
-.home {
-  padding: 20px;
-  margin: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
