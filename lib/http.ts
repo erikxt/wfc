@@ -5,6 +5,7 @@ const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
 const instance = axios.create({
   baseURL: publicRuntimeConfig.apiHost,
   timeout: 10000,
+  validateStatus: (status) => true,
 });
 instance.interceptors.request.use(
   function (config) {
