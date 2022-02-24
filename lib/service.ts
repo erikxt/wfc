@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from "axios";
 import http from "./http";
 
 interface Param {
-  [key: string] : string
+  [key: string] : object
 }
 
 const ApiService = {
@@ -24,7 +24,10 @@ const ApiService = {
   getInfo(primaryCateId: number, id: number) {
     return http.get("/category/" + primaryCateId + "/info/" + id);
   },
-  getPage(params: Param) {
+  getLabels(primaryCateId: number, id: number) {
+    return http.get("/category/" + primaryCateId + "/info/" + id + "/label/");
+  },
+  getPage(params: any) {
     return http.get("/page", { params: params });
   },
 };

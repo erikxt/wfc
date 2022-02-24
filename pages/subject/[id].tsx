@@ -18,9 +18,7 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }: any) {
   const res = await api.getSubject(params.id);
-  // console.log(res.status);
   const subject = res.data;
-  // console.log(subject);
   return {
     props: {
       subject,
