@@ -1,9 +1,11 @@
 import api from "../../lib/service";
-import Button from "@mui/material/Button";
 import Head from "next/head";
-import { Link } from "@mui/material";
-import styles from "../../styles/Subject.module.css"
+import styles from "../../styles/Subject.module.css";
 import Custom404 from "../404";
+import { Button } from "@mui/material";
+// import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 // export async function getStaticPaths() {
 //   const res = await api.getSubjectIds();
@@ -21,8 +23,7 @@ export async function getServerSideProps({ params }: any) {
   const res = await api.getSubject(params.id);
   if (res.status == 404) {
     return {
-      props: {
-      },
+      props: {},
     };
   }
   const subject = res.data;
@@ -34,14 +35,11 @@ export async function getServerSideProps({ params }: any) {
 }
 
 export default function Subject({ subject }: any) {
+  const router = useRouter();
+  // let navigate = useNavigate();
   if (subject === undefined) {
-    return <Custom404 />
+    return <Custom404 />;
   }
-
-  const labels: JSX.Element[] = [];
-  subject.labelNames.forEach((item: any) => {
-    labels.push(<span key={item} className={styles.label}> #{item} </span>);
-  });
 
   return (
     <>
@@ -53,11 +51,23 @@ export default function Subject({ subject }: any) {
       <div className={styles.content}>
         <h2>{subject.subjectName}</h2>
         <div dangerouslySetInnerHTML={{ __html: subject.subjectAnswer }}></div>
-        <div className={styles.labels}>Labels: {labels}</div>
-        <div className={styles.home}>
-          <Link href="/">
-            <Button variant="contained">Home</Button>
-          </Link>
+        <div className={styles.labels}>
+          Labels:{" "}
+          {subject.labelNames.map((item: any) => (
+            <span key={item} className={styles.label}>
+              #{item}
+            </span>
+          ))}
+        </div>
+        <div className={styles.button}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              router.push("/");
+            }}
+          >
+            Home
+          </Button>
         </div>
       </div>
     </>

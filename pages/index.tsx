@@ -1,26 +1,41 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import api from "../lib/service";
-import { useEffect, useState } from "react";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Pagination from "@mui/material/Pagination";
-import Table from "@mui/material/Table";
-import TableHead from "@mui/material/TableHead";
-import TableCell from "@mui/material/TableCell";
-import TableBody from "@mui/material/TableBody";
-import TableRow from "@mui/material/TableRow";
-import TableContainer from "@mui/material/TableContainer";
-import Paper from "@mui/material/Paper";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Pagination,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import Link from "next/link";
 import Typography from "@mui/material/Typography";
-import { stringify } from "querystring";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateCate,
+  updateInfo,
+  updateInfos,
+  updateLabel,
+  updateLabels,
+  updatePage,
+} from "../store/pageSlice";
+import { RootState } from "../store/store";
+import { info } from "console";
 
 const pageSize = 5;
 
 const groupByToArray = (data: any, key: string, selectKey: string) => {
+  if (data == undefined || data.length == 0) {
+    return [];
+  }
   const tmp = data.reduce(function (prev: any, cur: any) {
     (prev[cur[key]] = prev[cur[key]] || []).push(cur[selectKey]);
     return prev;
@@ -37,94 +52,102 @@ const groupByToArray = (data: any, key: string, selectKey: string) => {
 
 export async function getStaticProps() {
   const categories = (await api.getCategories()).data;
-  const defaultPrimaryCateId = categories[0].primaryCategoryId;
-  const infos = (await api.getInfos(defaultPrimaryCateId)).data;
-  const defaultInfoId = infos[0].categoryId;
-  const labels = groupByToArray(
-    (await api.getLabels(defaultPrimaryCateId, defaultInfoId)).data,
-    "labelName",
-    "assembleId"
-  );
 
-  const [items, totalCount] = (
-    await api.getPage({
-      primaryCategoryId: categories[0].primaryCategoryId,
-      // categoryId: infos[0].categoryId,
-    })
-  ).data;
+  // const [items, totalCount] = (
+  //   await api.getPage({
+  //     primaryCategoryId: categories[0].primaryCategoryId,
+  //     page: 1,
+  //     size: pageSize,
+  //     // categoryId: infos[0].categoryId,
+  //   })
+  // ).data;
 
   return {
     props: {
       categories,
-      infos,
-      labels,
-      items,
-      totalCount,
+      // infos,
+      // labels,
+      // items,
+      // totalCount,
     },
   };
 }
 
-const Home = ({ categories, infos, labels, items, totalCount }: any) => {
-  // const cateOptions = categories.map((option) => option.categoryName);
-  const [cateValue, setCateValue] = useState(categories[0].primaryCategoryId);
-  const [infoValue, setInfoValue] = useState();
-  const [labelValue, setLabelValue] = useState(); //labels[0].assembleId
-  const [subjects, setSubjects] = useState(items);
-  const [categoryInfos, setCategoryInfos] = useState(infos);
-  const [labelInfos, setLabelInfos] = useState(labels);
-  const [page, setPage] = useState(1);
-  const [totalPageCount, setTotalPageCount] = useState(
-    Math.ceil(totalCount / pageSize)
-  );
+const Home = ({ categories }: any) => {
+  const reduxState = useSelector((state: RootState) => state.pageInfo);
+  const dispatch = useDispatch();
+  if (reduxState.cateId === 0) {
+    dispatch(updateCate(categories[0].primaryCategoryId));
+  }
+  // const [cateValue, setCateValue] = useState(reduxState.cateId);
+  // console.log(cateValue);
+  const [subjects, setSubjects] = useState([]);
+  const [page, setPage] = useState(reduxState.page);
+  const [totalPageCount, setTotalPageCount] = useState(1);
+  // Math.ceil(totalCount / pageSize)
 
-  // const labelOptions: JSX.Element[] = [];
-  // for (let key in labels) {
-  //   const val = labels[key].join(",");
-  //   labelOptions.push(
-  //     <MenuItem key={val} value={val}>
-  //       {key}
-  //     </MenuItem>
-  //   );
-  // }
+  if (reduxState.infos.length == 0) {
+    api.getInfos(reduxState.cateId).then((res) => {
+      const infos = res.data;
+      dispatch(updateInfos(infos));
+    });
+  }
+
+  if (reduxState.infoId != 0 && reduxState.labels.length == 0) {
+    api.getLabels(reduxState.cateId, reduxState.infoId).then((res) => {
+      const labels = groupByToArray(res.data, "labelName", "assembleId");
+      dispatch(updateLabels(labels));
+    });
+  }
 
   useEffect(() => {
     const params = {
-      primaryCategoryId: cateValue,
-      categoryId: infoValue,
-      assembleIds: labelValue,
-      page: page,
+      primaryCategoryId: reduxState.cateId,
+      categoryId: reduxState.infoId != 0 ? reduxState.infoId : undefined,
+      assembleIds: reduxState.assembleId != "0" ? reduxState.assembleId : undefined,
+      page: reduxState.page,
+      size: pageSize,
     };
     api.getPage(params).then((resp) => {
       const [items, totalCount] = resp.data;
       setSubjects(items);
       setTotalPageCount(Math.ceil(totalCount / pageSize));
     });
-  }, [cateValue, page, infoValue, labelValue]);
+  }, [reduxState.page, reduxState.cateId, reduxState.infoId, reduxState.assembleId]);
 
   const handleCategoryChange = async (event: any) => {
-    const newVal = event.target.value;
-    setCateValue(newVal);
-    const infos = (await api.getInfos(newVal)).data;
-    setCategoryInfos(infos);
-    const newInfoVal = infos[0].categoryId;
-    setInfoValue(undefined);
-    setLabelValue(undefined);
+    // console.log("3333");
+    const newCate = event.target.value;
+    // setCateValue(newCate);
+    dispatch(updateCate(newCate));
+    setPage(1);
+    dispatch(updatePage(1));
+    const infos = (await api.getInfos(newCate)).data;
+    dispatch(updateInfo(0));
+    dispatch(updateLabel("0"));
+    dispatch(updateInfos(infos));
   };
 
   const handleCategoryInfoChange = async (event: any) => {
-    const newVal = event.target.value;
-    setInfoValue(newVal);
-    const labels = (await api.getLabels(cateValue, newVal)).data;
-    setLabelValue(undefined);
-    setLabelInfos(groupByToArray(labels, "labelName", "assembleId"));
+    // console.log("444444");
+    const newInfoId = event.target.value;
+    setPage(1);
+    dispatch(updatePage(1));
+    const labels = (await api.getLabels(reduxState.cateId, newInfoId)).data;
+    dispatch(updateLabel("0"));
+    dispatch(updateLabels(groupByToArray(labels, "labelName", "assembleId")));
+    dispatch(updateInfo(newInfoId));
   };
 
   const handleLabelInfoChange = (event: any) => {
-    setLabelValue(event.target.value);
+    const newAssembleId = event.target.value;
+    dispatch(updateLabel(newAssembleId));
+    dispatch(updatePage(1));
   };
 
   const handleChangePage = (event: any, newPage: any) => {
     setPage(newPage);
+    dispatch(updatePage(newPage));
   };
 
   return (
@@ -144,7 +167,7 @@ const Home = ({ categories, infos, labels, items, totalCount }: any) => {
               <Select
                 labelId="cate-select-label"
                 id="cate-select"
-                value={cateValue}
+                value={reduxState.cateId}
                 label="类别"
                 autoWidth
                 onChange={handleCategoryChange}
@@ -164,15 +187,15 @@ const Home = ({ categories, infos, labels, items, totalCount }: any) => {
               <Select
                 labelId="info-select-label"
                 id="info-select"
-                value={infoValue}
+                value={reduxState.infoId}
                 label="子类别"
                 autoWidth
                 onChange={handleCategoryInfoChange}
               >
-                <MenuItem key="blank" value={undefined}>
+                <MenuItem key="blank1" value={0}>
                   全部
                 </MenuItem>
-                {categoryInfos.map((item: any) => (
+                {reduxState.infos.map((item: any) => (
                   <MenuItem key={item.categoryId} value={item.categoryId}>
                     {item.categoryName}
                   </MenuItem>
@@ -184,19 +207,21 @@ const Home = ({ categories, infos, labels, items, totalCount }: any) => {
               <Select
                 labelId="label-select-label"
                 id="label-select"
-                value={labelValue}
+                value={reduxState.assembleId}
                 label="标签"
                 autoWidth
                 onChange={handleLabelInfoChange}
               >
-                <MenuItem key="blank" value={undefined}>
+                <MenuItem key="blank2" value={"0"}>
                   全部
                 </MenuItem>
-                {labelInfos.map((item: any) => (
-                  <MenuItem key={item.assembleId} value={item.assembleId}>
-                    {item.labelName}
-                  </MenuItem>
-                ))}
+                {reduxState.labels.map((item: any) => {
+                  return (
+                    <MenuItem key={item.assembleId} value={item.assembleId}>
+                      {item.labelName}
+                    </MenuItem>
+                  );
+                })}
               </Select>
             </FormControl>
           </div>
