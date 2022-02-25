@@ -1,24 +1,27 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import api from "../lib/service";
-import { useEffect, useState } from "react";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Pagination from "@mui/material/Pagination";
-import Table from "@mui/material/Table";
-import TableHead from "@mui/material/TableHead";
-import TableCell from "@mui/material/TableCell";
-import TableBody from "@mui/material/TableBody";
-import TableRow from "@mui/material/TableRow";
-import TableContainer from "@mui/material/TableContainer";
-import Paper from "@mui/material/Paper";
+import { useEffect, useRef, useState } from "react";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Pagination,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import Link from "next/link";
 import Typography from "@mui/material/Typography";
-import { stringify } from "querystring";
+import { useDispatch, useSelector } from "react-redux";
+import { updatePage } from "../store/pageSlice";
 
-const pageSize = 5;
+const pageSize = 10;
 
 const groupByToArray = (data: any, key: string, selectKey: string) => {
   const tmp = data.reduce(function (prev: any, cur: any) {
@@ -49,6 +52,8 @@ export async function getStaticProps() {
   const [items, totalCount] = (
     await api.getPage({
       primaryCategoryId: categories[0].primaryCategoryId,
+      page: 1,
+      size: pageSize,
       // categoryId: infos[0].categoryId,
     })
   ).data;
@@ -65,45 +70,46 @@ export async function getStaticProps() {
 }
 
 const Home = ({ categories, infos, labels, items, totalCount }: any) => {
-  // const cateOptions = categories.map((option) => option.categoryName);
+  const pageInfo = useSelector((state) => state);
+  const dispatch = useDispatch();
+
   const [cateValue, setCateValue] = useState(categories[0].primaryCategoryId);
   const [infoValue, setInfoValue] = useState();
   const [labelValue, setLabelValue] = useState(); //labels[0].assembleId
-  const [subjects, setSubjects] = useState(items);
+  const [subjects, setSubjects] = useState([]);
   const [categoryInfos, setCategoryInfos] = useState(infos);
   const [labelInfos, setLabelInfos] = useState(labels);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(pageInfo.page.page);
   const [totalPageCount, setTotalPageCount] = useState(
     Math.ceil(totalCount / pageSize)
   );
 
-  // const labelOptions: JSX.Element[] = [];
-  // for (let key in labels) {
-  //   const val = labels[key].join(",");
-  //   labelOptions.push(
-  //     <MenuItem key={val} value={val}>
-  //       {key}
-  //     </MenuItem>
-  //   );
-  // }
+  const mounting = useRef(true);
 
   useEffect(() => {
+    // if (mounting.current) {
+    //   console.log("init");
+    //   mounting.current = false;
+    //   return;
+    // }
     const params = {
       primaryCategoryId: cateValue,
       categoryId: infoValue,
       assembleIds: labelValue,
-      page: page,
+      page: pageInfo.page.page,
+      size: pageSize,
     };
     api.getPage(params).then((resp) => {
       const [items, totalCount] = resp.data;
       setSubjects(items);
       setTotalPageCount(Math.ceil(totalCount / pageSize));
     });
-  }, [cateValue, page, infoValue, labelValue]);
+  }, [cateValue, infoValue, labelValue, pageInfo]);
 
   const handleCategoryChange = async (event: any) => {
     const newVal = event.target.value;
     setCateValue(newVal);
+    setPage(1);
     const infos = (await api.getInfos(newVal)).data;
     setCategoryInfos(infos);
     const newInfoVal = infos[0].categoryId;
@@ -114,6 +120,7 @@ const Home = ({ categories, infos, labels, items, totalCount }: any) => {
   const handleCategoryInfoChange = async (event: any) => {
     const newVal = event.target.value;
     setInfoValue(newVal);
+    setPage(1);
     const labels = (await api.getLabels(cateValue, newVal)).data;
     setLabelValue(undefined);
     setLabelInfos(groupByToArray(labels, "labelName", "assembleId"));
@@ -125,6 +132,7 @@ const Home = ({ categories, infos, labels, items, totalCount }: any) => {
 
   const handleChangePage = (event: any, newPage: any) => {
     setPage(newPage);
+    dispatch(updatePage(newPage));
   };
 
   return (
@@ -241,7 +249,9 @@ const Home = ({ categories, infos, labels, items, totalCount }: any) => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             /> */}
-            <Typography>Page: {page}</Typography>
+            <Typography>
+              Page: {page}
+            </Typography>
             <Pagination
               count={totalPageCount}
               page={page}
