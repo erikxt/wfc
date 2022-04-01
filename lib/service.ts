@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from "axios";
 import http from "./http";
 
 interface Param {
-  [key: string] : object
+  [key: string]: object;
 }
 
 const ApiService = {
@@ -11,6 +11,9 @@ const ApiService = {
   },
   getSubjectIds() {
     return http.get("/subject", { params: { fields: "id" } });
+  },
+  getAllSubjectIds() {
+    return http.get("/subject/id/all");
   },
   getCategories() {
     return http.get("/category");

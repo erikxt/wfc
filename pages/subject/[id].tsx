@@ -3,9 +3,9 @@ import Head from "next/head";
 import styles from "../../styles/Subject.module.css";
 import Custom404 from "../404";
 import { Button } from "@mui/material";
-// import { useNavigate } from "react-router-dom";
 import { useRouter } from "next/router";
-import Link from "next/link";
+import useKey from "use-key-hook";
+import { useState } from "react";
 
 // export async function getStaticPaths() {
 //   const res = await api.getSubjectIds();
@@ -21,21 +21,41 @@ import Link from "next/link";
 
 export async function getServerSideProps({ params }: any) {
   const res = await api.getSubject(params.id);
+  const r = await api.getAllSubjectIds();
   if (res.status == 404) {
     return {
       props: {},
     };
   }
+  const ids = r.data as number[];
+  const index = ids.indexOf(params.id);
   const subject = res.data;
+  const prev = ids[index - 1];
+  const next = ids[(index + 1) % ids.length];
   return {
     props: {
       subject,
+      prev,
+      next,
     },
   };
 }
 
-export default function Subject({ subject }: any) {
+export default function Subject({ subject, prev, next }: any) {
   const router = useRouter();
+  // useKey(
+  //   () => {
+  //     router.push("/subject/" + prev);
+  //   },
+  //   { detectKeys: [37] }
+  // );
+  // useKey(
+  //   () => {
+  //     router.push("/subject/" + next);
+  //   },
+  //   { detectKeys: [39] }
+  // );
+
   // let navigate = useNavigate();
   if (subject === undefined) {
     return <Custom404 />;
@@ -63,10 +83,28 @@ export default function Subject({ subject }: any) {
           <Button
             variant="contained"
             onClick={() => {
+              router.push("/subject/" + prev);
+            }}
+          >
+            Prev
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
               router.push("/");
             }}
           >
             Home
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={() => {
+              debugger;
+              router.push("/subject/" + next);
+            }}
+          >
+            Next
           </Button>
         </div>
       </div>
