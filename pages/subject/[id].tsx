@@ -4,7 +4,13 @@ import styles from "../../styles/Subject.module.css";
 import Custom404 from "../404";
 import { Button } from "@mui/material";
 import { useRouter } from "next/router";
-import useKey from "use-key-hook";
+import {
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { useState } from "react";
 
 // export async function getStaticPaths() {
@@ -27,11 +33,13 @@ export async function getServerSideProps({ params }: any) {
       props: {},
     };
   }
+  // console.log("param", params.id);
   const ids = r.data as number[];
   const index = ids.indexOf(params.id);
   const subject = res.data;
   const prev = ids[index - 1];
   const next = ids[(index + 1) % ids.length];
+  // console.log("-------", prev, next);
   return {
     props: {
       subject,
@@ -43,18 +51,29 @@ export async function getServerSideProps({ params }: any) {
 
 export default function Subject({ subject, prev, next }: any) {
   const router = useRouter();
-  // useKey(
-  //   () => {
-  //     router.push("/subject/" + prev);
-  //   },
-  //   { detectKeys: [37] }
-  // );
-  // useKey(
-  //   () => {
-  //     router.push("/subject/" + next);
-  //   },
-  //   { detectKeys: [39] }
-  // );
+  const prevRef = useRef();
+  const nextRef = useRef();
+
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      switch (event.key) {
+        case "ArrowLeft":
+          router.push("/subject/" + prevRef.current);
+          break;
+        case "ArrowRight":
+          router.push("/subject/" + nextRef.current);
+          break;
+        default:
+          break;
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    prevRef.current = prev;
+    nextRef.current = next;
+  }, [prev, next]);
 
   // let navigate = useNavigate();
   if (subject === undefined) {
@@ -100,7 +119,6 @@ export default function Subject({ subject, prev, next }: any) {
           <Button
             variant="contained"
             onClick={() => {
-              debugger;
               router.push("/subject/" + next);
             }}
           >

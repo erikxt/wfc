@@ -1,11 +1,7 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import api from "../lib/service";
-<<<<<<< HEAD
-import { useEffect, useRef, useState } from "react";
-=======
 import { useEffect, useMemo, useRef, useState } from "react";
->>>>>>> 4ff675bc02a198313bf401fd6e1c4446a8d088b5
 import {
   FormControl,
   InputLabel,
@@ -23,9 +19,6 @@ import {
 import Link from "next/link";
 import Typography from "@mui/material/Typography";
 import { useDispatch, useSelector } from "react-redux";
-<<<<<<< HEAD
-import { updatePage } from "../store/pageSlice";
-=======
 import {
   updateCate,
   updateInfo,
@@ -36,7 +29,6 @@ import {
 } from "../store/pageSlice";
 import { RootState } from "../store/store";
 import { info } from "console";
->>>>>>> 4ff675bc02a198313bf401fd6e1c4446a8d088b5
 
 const pageSize = 10;
 
@@ -61,16 +53,6 @@ const groupByToArray = (data: any, key: string, selectKey: string) => {
 export async function getStaticProps() {
   const categories = (await api.getCategories()).data;
 
-<<<<<<< HEAD
-  const [items, totalCount] = (
-    await api.getPage({
-      primaryCategoryId: categories[0].primaryCategoryId,
-      page: 1,
-      size: pageSize,
-      // categoryId: infos[0].categoryId,
-    })
-  ).data;
-=======
   // const [items, totalCount] = (
   //   await api.getPage({
   //     primaryCategoryId: categories[0].primaryCategoryId,
@@ -79,7 +61,6 @@ export async function getStaticProps() {
   //     // categoryId: infos[0].categoryId,
   //   })
   // ).data;
->>>>>>> 4ff675bc02a198313bf401fd6e1c4446a8d088b5
 
   return {
     props: {
@@ -92,24 +73,6 @@ export async function getStaticProps() {
   };
 }
 
-<<<<<<< HEAD
-const Home = ({ categories, infos, labels, items, totalCount }: any) => {
-  const pageInfo = useSelector((state) => state);
-  const dispatch = useDispatch();
-
-  const [cateValue, setCateValue] = useState(categories[0].primaryCategoryId);
-  const [infoValue, setInfoValue] = useState();
-  const [labelValue, setLabelValue] = useState(); //labels[0].assembleId
-  const [subjects, setSubjects] = useState([]);
-  const [categoryInfos, setCategoryInfos] = useState(infos);
-  const [labelInfos, setLabelInfos] = useState(labels);
-  const [page, setPage] = useState(pageInfo.page.page);
-  const [totalPageCount, setTotalPageCount] = useState(
-    Math.ceil(totalCount / pageSize)
-  );
-
-  const mounting = useRef(true);
-=======
 const Home = ({ categories }: any) => {
   const reduxState = useSelector((state: RootState) => state.pageInfo);
   const dispatch = useDispatch();
@@ -136,7 +99,6 @@ const Home = ({ categories }: any) => {
       dispatch(updateLabels(labels));
     });
   }
->>>>>>> 4ff675bc02a198313bf401fd6e1c4446a8d088b5
 
   useEffect(() => {
     // if (mounting.current) {
@@ -145,17 +107,10 @@ const Home = ({ categories }: any) => {
     //   return;
     // }
     const params = {
-<<<<<<< HEAD
-      primaryCategoryId: cateValue,
-      categoryId: infoValue,
-      assembleIds: labelValue,
-      page: pageInfo.page.page,
-=======
       primaryCategoryId: reduxState.cateId,
       categoryId: reduxState.infoId != 0 ? reduxState.infoId : undefined,
       assembleIds: reduxState.assembleId != "0" ? reduxState.assembleId : undefined,
       page: reduxState.page,
->>>>>>> 4ff675bc02a198313bf401fd6e1c4446a8d088b5
       size: pageSize,
     };
     api.getPage(params).then((resp) => {
@@ -163,28 +118,6 @@ const Home = ({ categories }: any) => {
       setSubjects(items);
       setTotalPageCount(Math.ceil(totalCount / pageSize));
     });
-<<<<<<< HEAD
-  }, [cateValue, infoValue, labelValue, pageInfo]);
-
-  const handleCategoryChange = async (event: any) => {
-    const newVal = event.target.value;
-    setCateValue(newVal);
-    setPage(1);
-    const infos = (await api.getInfos(newVal)).data;
-    setCategoryInfos(infos);
-    const newInfoVal = infos[0].categoryId;
-    setInfoValue(undefined);
-    setLabelValue(undefined);
-  };
-
-  const handleCategoryInfoChange = async (event: any) => {
-    const newVal = event.target.value;
-    setInfoValue(newVal);
-    setPage(1);
-    const labels = (await api.getLabels(cateValue, newVal)).data;
-    setLabelValue(undefined);
-    setLabelInfos(groupByToArray(labels, "labelName", "assembleId"));
-=======
   }, [reduxState.page, reduxState.cateId, reduxState.infoId, reduxState.assembleId]);
 
   const handleCategoryChange = async (event: any) => {
@@ -209,7 +142,6 @@ const Home = ({ categories }: any) => {
     dispatch(updateLabel("0"));
     dispatch(updateLabels(groupByToArray(labels, "labelName", "assembleId")));
     dispatch(updateInfo(newInfoId));
->>>>>>> 4ff675bc02a198313bf401fd6e1c4446a8d088b5
   };
 
   const handleLabelInfoChange = (event: any) => {
