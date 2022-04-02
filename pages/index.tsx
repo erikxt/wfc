@@ -1,7 +1,7 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import api from "../lib/service";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FormControl,
   InputLabel,
@@ -28,9 +28,8 @@ import {
   updatePage,
 } from "../store/pageSlice";
 import { RootState } from "../store/store";
-import { info } from "console";
 
-const pageSize = 10;
+const pageSize = 5;
 
 const groupByToArray = (data: any, key: string, selectKey: string) => {
   if (data == undefined || data.length == 0) {
@@ -75,8 +74,9 @@ export async function getStaticProps() {
 
 const Home = ({ categories }: any) => {
   const reduxState = useSelector((state: RootState) => state.pageInfo);
+  console.log("------------------------", reduxState);
   const dispatch = useDispatch();
-  if (reduxState.cateId === 0) {
+  if (reduxState && reduxState.cateId === 0) {
     dispatch(updateCate(categories[0].primaryCategoryId));
   }
   // const [cateValue, setCateValue] = useState(reduxState.cateId);
@@ -101,15 +101,11 @@ const Home = ({ categories }: any) => {
   }
 
   useEffect(() => {
-    // if (mounting.current) {
-    //   console.log("init");
-    //   mounting.current = false;
-    //   return;
-    // }
     const params = {
       primaryCategoryId: reduxState.cateId,
       categoryId: reduxState.infoId != 0 ? reduxState.infoId : undefined,
-      assembleIds: reduxState.assembleId != "0" ? reduxState.assembleId : undefined,
+      assembleIds:
+        reduxState.assembleId != "0" ? reduxState.assembleId : undefined,
       page: reduxState.page,
       size: pageSize,
     };
@@ -118,7 +114,12 @@ const Home = ({ categories }: any) => {
       setSubjects(items);
       setTotalPageCount(Math.ceil(totalCount / pageSize));
     });
-  }, [reduxState.page, reduxState.cateId, reduxState.infoId, reduxState.assembleId]);
+  }, [
+    reduxState.page,
+    reduxState.cateId,
+    reduxState.infoId,
+    reduxState.assembleId,
+  ]);
 
   const handleCategoryChange = async (event: any) => {
     // console.log("3333");
@@ -271,9 +272,7 @@ const Home = ({ categories }: any) => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             /> */}
-            <Typography>
-              Page: {page}
-            </Typography>
+            <Typography>Page: {page}</Typography>
             <Pagination
               count={totalPageCount}
               page={page}
