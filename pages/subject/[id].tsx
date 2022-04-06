@@ -100,7 +100,6 @@ export default function Subject({ subject, prev, next }: any) {
         </div>
         <div className={styles.button}>
           <Button
-            variant="contained"
             onClick={() => {
               router.push("/subject/" + prev);
             }}
@@ -117,7 +116,6 @@ export default function Subject({ subject, prev, next }: any) {
           </Button>
 
           <Button
-            variant="contained"
             onClick={() => {
               router.push("/subject/" + next);
             }}

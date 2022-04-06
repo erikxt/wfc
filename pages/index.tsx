@@ -74,7 +74,6 @@ export async function getStaticProps() {
 
 const Home = ({ categories }: any) => {
   const reduxState = useSelector((state: RootState) => state.pageInfo);
-  console.log("------------------------", reduxState);
   const dispatch = useDispatch();
   if (reduxState && reduxState.cateId === 0) {
     dispatch(updateCate(categories[0].primaryCategoryId));
