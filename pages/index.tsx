@@ -29,7 +29,7 @@ import {
 } from "../store/pageSlice";
 import { RootState } from "../store/store";
 
-const pageSize = 5;
+const pageSize = 20;
 
 const groupByToArray = (data: any, key: string, selectKey: string) => {
   if (data == undefined || data.length == 0) {
